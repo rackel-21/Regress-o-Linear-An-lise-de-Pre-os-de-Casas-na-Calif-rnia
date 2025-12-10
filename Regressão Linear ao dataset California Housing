@@ -1,0 +1,50 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+ch_train = pd.read_csv('/content/sample_data/california_housing_train.csv')
+ch_test  = pd.read_csv('/content/sample_data/california_housing_test.csv')
+
+X_train = ch_train.drop("median_house_value", axis=1)
+Y_train = ch_train["median_house_value"]
+
+X_test = ch_test.drop("median_house_value", axis=1)
+Y_test = ch_test["median_house_value"]
+
+lr = LinearRegression()
+lr.fit(X_train, Y_train)
+
+lr_pred = lr.predict(X_test)
+
+print('*** Medidas de erro - regressão ***')
+print("MSE:", mean_squared_error(Y_test, lr_pred))
+print("MAE:", mean_absolute_error(Y_test, lr_pred))
+print("\n*** Medida de acerto - regressão ***")
+print("R2 Score:", r2_score(Y_test, lr_pred))
+
+plt.figure(figsize=(8,6))
+sns.scatterplot(x=Y_test, y=lr_pred, alpha=0.5)
+plt.xlabel("Valores Reais")
+plt.ylabel("Valores Preditos")
+plt.title("Real vs Predito — Regressão Linear")
+plt.plot([Y_test.min(), Y_test.max()], [Y_test.min(), Y_test.max()], color='red')
+plt.show()
+
+residuos = Y_test - lr_pred
+plt.figure(figsize=(8,6))
+sns.scatterplot(x=lr_pred, y=residuos, alpha=0.5)
+plt.axhline(0, color='red', linestyle='--')
+plt.xlabel("Valores Preditos")
+plt.ylabel("Resíduos")
+plt.title("Gráfico de Resíduos")
+plt.show()
+
+plt.figure(figsize=(8,6))
+sns.histplot(residuos, kde=True, bins=40)
+plt.title("Distribuição dos Erros (Resíduos)")
+plt.xlabel("Erro")
+plt.show()
+
+pd.DataFrame({"Real": Y_test.values[:10], "Predito": lr_pred[:10]})
